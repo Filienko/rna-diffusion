@@ -4,7 +4,7 @@
 
 Pipeline overview for generating the L1000 landmark genes and reconstructing the full transcriptome:
 <p align="center">
-  <img src="figures/overview_diffusion_rna.png" width="750" />
+  <img src="figures/overview_diffusion_rna.png" width="1050" />
 </p>
 
 
