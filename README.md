@@ -2,6 +2,18 @@
 
 (Repo under construction)
 
+Pipeline overview for generating the L1000 landmark genes and reconstructing the full transcriptome:
+<p align="center">
+  <img src="figures/overview_diffusion_rna.png" width="750" />
+</p>
+
+
+PCA visualization of the generation process in our diffusion model (colors highlight the different tissue types):
+<p align="center">
+  <img src="figures/pca_gtex_ddim_sequences_tissues.png" width="450" />
+</p>
+
+
 ## Requirements
 
 Install the required python librairies:
