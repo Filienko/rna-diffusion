@@ -1,17 +1,18 @@
 # Gene Expression Generation with Diffusion Models
 
-(Repo under construction)
+(Repo under construction...)
 
-Pipeline overview for generating the L1000 landmark genes and reconstructing the full transcriptome:
 <p align="center">
   <img src="figures/overview_diffusion_rna.png" width="1050" />
 </p>
+**Pipeline overview for generating the L1000 landmark genes and reconstructing the full transcriptome.**
 
+______________________________________________________________________________________________________________________
 
-PCA visualization of the generation process in our diffusion model (colors highlight the different tissue types):
 <p align="center">
-  <img src="figures/pca_gtex_ddim_sequences_tissues.png" width="450" />
+  <img src="figures/pca_gtex_ddim_sequences_tissues.png" width="750" />
 </p>
+**PCA visualization of the generation process in our diffusion model (colors highlight the different tissue types).**
 
 
 ## Requirements
