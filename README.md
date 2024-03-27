@@ -75,8 +75,12 @@ Scripts of these metrics can be found in the `metrics` folder.
 
 To train one of the generative models (VAE, WGAN-GP and DDIM), reconstruct from landmark genes (L1000) to the full transcriptome (with regression or a MLP), please refer to the commands in the following bash scripts:
 
-`bash run_main.sh`
-
-`bash run_main_vae.sh`
-
-`bash run_main_gan.sh`
+```bash
+bash run_main.sh
+```
+```bash
+bash run_main_vae.sh
+```
+```bash
+bash run_main_gan.sh
+```
