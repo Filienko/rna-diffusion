@@ -24,7 +24,7 @@ Be careful! Before installing these librairies, make sure that you created an en
 
 To install the required python librairies:
 
-`pip install -r requirements.txt`
+> `pip install -r requirements.txt`
 
 ## RNA-seq datasets
 
