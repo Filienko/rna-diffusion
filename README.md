@@ -34,8 +34,6 @@ The second dataset is the Cancer Genome Atlas (TCGA):
 Preprocessing of the data in the `data` folder.
 
 ## Deep generative models
-TODO
-
 The baseline generative models are the following:
 - Variational Autoencoder (VAE) [(Welling, M. and Kingma, D. P., 2014)](https://arxiv.org/abs/1312.6114)
 - Wasserstein Gan with Gradient Penalty (WGAN-GP) [(Arjovsky et al., 2017)](https://proceedings.mlr.press/v70/arjovsky17a.html)
@@ -66,3 +64,12 @@ Scripts of these metrics can be found in the `metrics` folder.
   <img src="figures/reverse_accuracy_boxplot.png" width="750" />
 </p>
 **Test classification accuracy using only landmark genes (orange) or the full transcriptome (blue). The baseline accuracy obtained with true data is displayed on the rightmost panel.**
+**We observe that DDIM and DDPM are better than the VAE and WGAN-GP in reduced dimensions (L1000 genes).**
+
+## Reproducibility (how to use the code)
+
+To train one of the generative models (VAE, WGAN-GP and DDIM), reconstruct from landmark genes (L1000) to the full transcriptome (with regression or a MLP), please refer to the commands in the following bash scripts:
+
+`bash run_main.sh`
+`bash run_main_vae.sh`
+`bash run_main_gan.sh`

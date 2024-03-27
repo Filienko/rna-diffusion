@@ -1,0 +1,2 @@
+,batch_size,hidden_dim1_d,hidden_dim1_g,hidden_dim2_d,hidden_dim2_g,hidden_dim3_g,lr_d,lr_g,optimizer,sn,search_time,best_value
+0,64,4096,256,128,1024,8192,0.00012369597257166516,0.0002754628849337088,rms_prop,False,131455.36104035378,0.8881693477395578

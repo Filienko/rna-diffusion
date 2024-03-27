@@ -1,0 +1,2 @@
+,beta_schedule,dim_layers,dropout,lr,time_sinus_embed,search_time,best_value
+0,quad,8192,0.1,0.0004783833151836702,False,42603.22848534584,0.951450232787186

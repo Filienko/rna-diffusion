@@ -1,0 +1,70 @@
+data:
+    dataset: "tcga_landmark" 
+    dataset_frechet: "tcga"
+    landmark: True
+    image_size: 978 # size of genes vector 
+    num_classes: 24 # number of conditioning classes
+    scaler_type: "maxabs" # standard/minmax/quantile/robust/none
+    n_quantiles: 1000
+    logit_transform: false # None
+    num_workers: 4 
+    persistent_workers: True
+    nb_nn: 10 # number of nearest neighbors for metrics computations
+
+model:
+    precision: "single" # left to 'single' as Mixed Precision is already implemented in our code
+    parallel: False # if multi gpus
+    type: "simple" 
+    model: "ddim" # always ddim
+    dropout: 0.1 
+    dim_t: 1 # timestep embedding size (scalar)
+    d_layers: [
+    4096,
+    4096
+    ] # MLP block layers
+    var_type: fixedlarge 
+    ema_rate: 0.999
+    ema: True
+    with_attn: False # no attention
+    is_y_cond: True # conditioning
+    use_y_emb: True # embedding layer for the one-hot conditioning labels
+    dim_y_emb: 2  # embedding layer dimension
+    is_time_embed: False
+    num_res_blocks: 0 # default 0 = 1 block only
+    attn_resolutions: [] 
+
+diffusion:
+    beta_schedule: quad # quad/linear/const/jsd/sigmoid
+    beta_start: 0.0001  # starting variance
+    beta_end: 0.02 # ending variance or maximum variance reached if scheduler
+    num_diffusion_timesteps: 1000 # number of diffusion steps
+
+training:
+    batch_size: 2048 
+    n_epochs: 15000 
+    n_iters: 5000000 # never used
+    snapshot_freq: 50000 # saving of weights
+    validation_freq: 2000 # never used in our case
+    metrics_step: 30000 # intervals to compute metrics during training
+
+sampling:
+    batch_size: 2048 
+    total_samples: 8200
+    compute_metrics: False
+
+optim:
+    weight_decay: 0.000
+    optimizer: "Adam" # Adam/RMSProp/SGD/
+    lr: 0.001416 # highest learning rate reached with scheduler
+    beta1: 0.9 # Adam hyperparameter
+    amsgrad: false # Adam hyperparameter
+    eps: 0.00000001 # for numerical hazards
+    # grad_clip: no clipping
+    use_scheduler: True
+    scheduler: "OneCycle" # StepLR/ExponentialLR
+    scheduler_step_size: 500 # epochs steps for scheduler
+    scheduler_gamma: 0.9 # Decreasing factor of scheduler
+    use_warmup: False # Warmup is used but it is hardcoded in the scripts
+    scheduler_warmup: "UntunedExponentialWarmup" # Not used. Warmup is hardcoded in the scripts.
+    warmup_period: 1000 # Not used. Warmup is hardcoded in the scripts.
+    warmup_last_step: 2500 # Not used. Warmup is hardcoded in the scripts.

@@ -1,0 +1,2 @@
+,batch_size,hidden_dim1,hidden_dim2,hidden_dim3,hidden_dim4,latent_dim,lr,n_blocks,optimizer,search_time,best_value
+0,256,8192,4096,4096,2048,128,0.0007847556686783999,4,adam,91522.30871486664,0.8116674648496042
