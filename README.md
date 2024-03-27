@@ -1,5 +1,8 @@
 # Gene Expression Generation with Diffusion Models
 
+[![PyPI pyversions](https://img.shields.io/badge/python-3.9-blue.svg)](https://python.org)
+
+
 (Repo under construction...)
 
 <p align="center">
@@ -17,7 +20,9 @@ ________________________________________________________________________________
 
 ## Requirements
 
-Install the required python librairies:
+Be careful! Before installing these librairies, make sure that you created an environment dedicated to this project and that the version of your NVIDIA driver matches this version of pytorch. Otherwise, you can adapt the correct version of pytorch. 
+
+To install the required python librairies:
 
 `pip install -r requirements.txt`
 
@@ -71,5 +76,7 @@ Scripts of these metrics can be found in the `metrics` folder.
 To train one of the generative models (VAE, WGAN-GP and DDIM), reconstruct from landmark genes (L1000) to the full transcriptome (with regression or a MLP), please refer to the commands in the following bash scripts:
 
 `bash run_main.sh`
+
 `bash run_main_vae.sh`
+
 `bash run_main_gan.sh`
