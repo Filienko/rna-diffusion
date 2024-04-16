@@ -93,10 +93,10 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     df_tcga = load_tcga(test)
     df_tcga = clean_data(df_tcga, keep_cols = ['age','gender','cancer', 'tissue_type'])
 
-    #age, gender, cancer
+    # age, gender, cancer
     numerical_covs = df_tcga[['age','gender','cancer']]
 
-    #convert gender column to 0 and 1
+    # convert gender column to 0 and 1
     numerical_covs.loc[numerical_covs['gender'] == "male", 'gender'] = 0
     numerical_covs.loc[numerical_covs['gender'] == "female", 'gender'] = 1
 
@@ -109,12 +109,10 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     Tissue_Encoder.fit(np.unique(TISSUES).reshape(-1,1))
 
     categorical_covs = df_tcga['tissue_type'].to_numpy()
-    #reshape to features vector
+    # reshape to features vector
     categorical_covs = categorical_covs.reshape((-1,1))
     categorical_covs = Tissue_Encoder.transform(X = categorical_covs)
     print(categorical_covs.shape)
-
-    #tissues types as one hot
     categorical_covs = categorical_covs.astype(np.int)
 
     true = df_tcga.drop(columns = ['age','gender','cancer','tissue_type'])
@@ -196,8 +194,6 @@ def get_tcga_datasets(scaler_type:str="standard"):
     X_train, numerical_covs, y_train = process_tcga_data(test=False, landmark=True)
     # Load test data
     X_test, numerical_covs_test, y_test = process_tcga_data(test=True, landmark=True)
-    # Split
-    # X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Scale the data
     if scaler_type == "standard":
@@ -212,16 +208,13 @@ def get_tcga_datasets(scaler_type:str="standard"):
         raise Exception("Unknown scaler type")
 
     X_train = scaler.fit_transform(X_train)
-    # X_val = scaler.transform(X_val)
     X_test = scaler.transform(X_test)
 
     # Turn data into tensors
     X_train = torch.tensor(X_train).type(torch.float)
-    # X_val = torch.tensor(X_val).type(torch.float)
     X_test = torch.tensor(X_test).type(torch.float)
 
     train = data_utils.TensorDataset(X_train, y_train) 
-    # val = data_utils.TensorDataset(X_val, y_val)
     test = data_utils.TensorDataset(X_test, y_test) 
 
     return train, test
@@ -349,8 +342,6 @@ def get_gtex_datasets(scaler_type:str="standard"):
     X_train, numerical_covs, y_train = process_gtex_data(test=False, landmark=True)
     # Load test data
     X_test, numerical_covs_test, y_test = process_gtex_data(test=True, landmark=True)
-    # Split
-    # X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Scale the data
     print("scaler_type", scaler_type)
@@ -366,16 +357,13 @@ def get_gtex_datasets(scaler_type:str="standard"):
         raise Exception("Unknown scaler type")
 
     X_train = scaler.fit_transform(X_train)
-    # X_valid = scaler.transform(X_valid)
     X_test = scaler.transform(X_test)
 
     # Turn data into tensors
     X_train = torch.tensor(X_train).type(torch.float)
-    # X_val = torch.tensor(X_val).type(torch.float)
     X_test = torch.tensor(X_test).type(torch.float)
 
     train = data_utils.TensorDataset(X_train, y_train) 
-    # val = data_utils.TensorDataset(X_valid, y_val)
     test = data_utils.TensorDataset(X_test, y_test) 
 
     return train, test
