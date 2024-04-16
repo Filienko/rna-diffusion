@@ -1,3 +1,7 @@
+"""
+The code in this repository was adapted from the original DDIM paper code: https://github.com/ermongroup/ddim
+"""
+
 import os
 import torch
 from src.generation.ddim.utils import get_tcga_datasets, get_gtex_datasets
