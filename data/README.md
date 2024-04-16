@@ -9,7 +9,7 @@
 </p>
 
 
-Link to GTEx portal for Bulk RNA-Seq data: https://gtexportal.org/home/downloads/adult-gtex/bulk_tissue_expression
+Link to GTEx portal for Bulk RNA-Seq data (v8): https://gtexportal.org/home/downloads/adult-gtex/bulk_tissue_expression
 1. Download the **RNA-Seq** zip file: GTEx_Analysis_2017-06-05_v8_RNASeQCv1.1.9_gene_tpm.gct.gz
 2. Download the **clinical data** file:  GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt
 3. Download the **tissue types** data file:  GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt

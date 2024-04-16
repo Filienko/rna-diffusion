@@ -141,6 +141,23 @@ def main():
     print(df)
 
     ##################################
+
+    # Keep only cohorts with more than 100 samples per tissue type
+    count_tissues = np.zeros_like(np.unique(df['tissue_type']))
+    for i in range(len(count_tissues)):
+        count_tissues[i] = (df['tissue_type'].values== np.unique(df['tissue_type'])[i]).sum().item()
+
+    for t in np.unique(df['tissue_type'])[count_tissues <100]:
+        idx_to_drop = df.loc[df['tissue_type'] == t].index.values
+        df = df.drop(idx_to_drop)
+    
+    df = df.reset_index()
+
+    # columns as type float
+    for col in df.columns[1:-5]:
+        df[col] = df[col].astype(float) 
+
+    ##################################
     # Train-test split
     X_train, X_val, y_train, y_val = train_test_split(df, df['tissue_type'], test_size=5000, random_state=42)
 
