@@ -4,7 +4,6 @@ from src.generation.ddim.utils import get_tcga_datasets, get_gtex_datasets
 import numpy as np
 
 def get_dataset(config):
-    #si notre dataset a TCGA dans son nom
     if "TCGA" in config.data.dataset or "tcga" in config.data.dataset:
         dataset, test_dataset = get_tcga_datasets(config)
 

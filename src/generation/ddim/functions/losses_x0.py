@@ -3,7 +3,6 @@ from torch.cuda.amp import autocast
 
 print("Functions/Losses.py")
 
-# 'simple' loss
 def noise_estimation_loss(model,
                           x0: torch.Tensor,
                           t: torch.LongTensor,
@@ -19,36 +18,21 @@ def noise_estimation_loss(model,
 
     # a = (1-b).cumprod(dim=0).index_select(0, t).view(-1, 1, 1, 1)
     a = (1-b).cumprod(dim=0).index_select(0, t).view(-1, 1)
-
-    #index_select = on selectionne les cumprod de b selon t
-    #view = reshape vers (batch_size, 1, 1, 1)
-    #alphas (a) = 1 - betas (b) //en gros c'est le alpha du papier (= alpha barre du DDPM) 
-    #EQUA (60) & (61) Pg.17 du papier.
-
-    xt = x0 * a.sqrt() + e * (1.0 - a).sqrt() #Definition d'un batch de x_t (x) selon alpha_t (a) et x0 (x0 = batch des samples sans bruit) et e_t (e)
-    #EQUA (4) Pg.3 du papier.
+    xt = x0 * a.sqrt() + e * (1.0 - a).sqrt() # noising
 
     # Runs the forward pass with autocasting.
     # Loss is computed under autocast env
     with autocast():
-        et = model(xt, t)
-        #On fait la prediction, estimation du bruit
-
-        x0_t = (xt - et * (1 - a).sqrt()) / a.sqrt() #On enleve le bruit de x_t pour estimer x0
-        #Estim x0
+        et = model(xt, t) # predicting noise
+        x0_t = (xt - et * (1 - a).sqrt()) / a.sqrt() #denoising to estimate x_0
 
         if keepdim:
             # Returns the individual losses for each sample in the batch
-            # return (e - output).square().sum(dim=(1, 2, 3)) #loss = diff entre bruit réel e et la prediction du bruit
             loss = (e - et).square().sum(dim=(1))
-            #EQUA (5) Pg.3 du papier.
         else:
             # Average loss across the entire batch
-            # return (e - output).square().sum(dim=(1, 2, 3)).mean(dim=0)
-            # return (e - output).square().sum(dim=(1)).mean(dim=0)
             avg = (e - et).abs().mean(dim=(1)).mean(dim=0)
             loss = (x0 - x0_t).square().sum(dim=(1)).mean(dim=0)
-            #EQUA (5) Pg.3 du papier.
     
     return loss, avg
 

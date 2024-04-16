@@ -21,7 +21,7 @@ np.random.seed(42)
 random.seed(42)
 
 
-torch.set_printoptions(sci_mode=False) #Je sais pas vraiment ce que ca va changer pour nous
+torch.set_printoptions(sci_mode=False) 
 
 
 def parse_args_and_config():
@@ -131,9 +131,8 @@ def parse_args_and_config():
     
     new_config = dict2namespace(config)
 
-    tb_path = os.path.join(args.exp, "tensorboard", args.doc) #TODO? No tensorboard pour l'instant
+    tb_path = os.path.join(args.exp, "tensorboard", args.doc) 
 
-    #if not args.test and not args.sample:
     if args.sample:
         if not args.resume_training:
             if os.path.exists(args.log_path):
@@ -147,7 +146,6 @@ def parse_args_and_config():
 
                 if overwrite:
                     shutil.rmtree(args.log_path)
-                    # shutil.rmtree(tb_path) #TODO? No tensorboard pour l'instant
                     os.makedirs(args.log_path)
                     if os.path.exists(tb_path):
                         shutil.rmtree(tb_path)
@@ -160,7 +158,6 @@ def parse_args_and_config():
             with open(os.path.join(args.log_path, "config.yml"), "w") as f:
                 yaml.dump(new_config, f, default_flow_style=False)
 
-        # new_config.tb_logger = tb.SummaryWriter(log_dir=tb_path) #TODO? No tensorboard pour l'instant
         # setup logger
         level = getattr(logging, args.verbose.upper(), None)
         if not isinstance(level, int):
@@ -187,7 +184,6 @@ def parse_args_and_config():
             if not os.path.exists(args.image_folder):
                 os.makedirs(args.image_folder)
             else:
-                #if not (args.fid or args.interpolation or args.noisepredi):
                 overwrite = False
                 if args.ni:
                     overwrite = True
@@ -220,9 +216,7 @@ def parse_args_and_config():
         logger.setLevel(level)
 
     # add device
-    #device = [torch.device(args.device[i]) for i in args.device]
     list_devices = args.device.strip("[]").split(",")
-    #device = [torch.device(int(list_devices[i])) for i in range(len(list_devices))]
     device = [int(list_devices[i]) for i in range(len(list_devices))]
     logging.info("Using device (s): {}".format(device))
     new_config.device = device
@@ -239,20 +233,18 @@ def parse_args_and_config():
 
     return args, new_config, config
 
-#fonction qui transforme un arbre de dictionnaires en arbre de namespaces (recursivement)
+# Tree of dicts to tree of namespaces
 def dict2namespace(config): 
-    namespace = argparse.Namespace() #Namespace is a simple container object that provides attribute-style access to its members.
+    namespace = argparse.Namespace() # Namespace is a simple container object that provides attribute-style access to its members.
     for key, value in config.items():
-        if isinstance(value, dict): #si on a un dictionnaire, on le transforme en namespace (recursivement)
+        if isinstance(value, dict): 
             new_value = dict2namespace(value)
-        else: #sinon on ajoute juste la valeur dans le namespace
+        else: 
             new_value = value
         setattr(namespace, key, new_value)
     return namespace
 
 
-
-# fonction qui parse les arguments et la config et execute le runner en conséquences
 def main():
     """
     Main function to run search.

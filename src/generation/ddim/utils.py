@@ -11,20 +11,18 @@ import numpy as np
 import torch
 import time as t
 import pandas as pd
-
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler, QuantileTransformer, RobustScaler, MaxAbsScaler
 from sklearn.model_selection import train_test_split
 import torch.utils.data as data_utils
 
-# Metrics
-# sys.path.append(os.path.abspath("../metrics"))
-# from src.metrics.precision_recall import compute_prdc
-# from src.metrics.aats import compute_AAts
-# from src.metrics.correlation_score import gamma_coeff_score
-# from src.metrics.frechet import compute_frechet_distance_score
-
 def get_dataset(config):
-    #si notre dataset a TCGA dans son nom
+    """
+    Get dataset from config.
+    Parameters:
+        config (dict): dict of the model configuration
+    Returns:
+        tuple of train dataframe and test dataframe (csv)
+    """
     if "TCGA" in config.data.dataset or "tcga" in config.data.dataset:
         dataset, test_dataset = get_tcga_datasets(config.data.scaler_type)
 
@@ -34,8 +32,13 @@ def get_dataset(config):
     return dataset, test_dataset
 
 def load_tcga(test:bool=False):
+    """
+    Parameters:
+        test (bool): whether to load the test dataset
+    Returns:
+        TCGA dataframe (csv)
+    """
     # HARDCODED
-    #path = "/home/alacan/scripts/diffusion_models/diffusion/diffusion/ddim/sources/datasets/"+dataset+".csv"
     if test:
         path = f"/home/alacan/data_RNAseq_RTCGA/test_df_covariates.csv"
     else:
@@ -44,8 +47,13 @@ def load_tcga(test:bool=False):
     return df_tcga
 
 def load_gtex(test:bool=False):
+    """
+    Parameters:
+        test (bool): whether to load the test dataset
+    Returns:
+        GTEx dataframe (csv)
+    """
     # HARDCODED
-    #path = "/home/alacan/scripts/diffusion_models/diffusion/diffusion/ddim/sources/datasets/"+dataset+".csv"
     if test:
         path = f"/home/alacan/GTEx_data/df_test_gtex_L974.csv"
     else:
@@ -54,7 +62,15 @@ def load_gtex(test:bool=False):
     return df
 
 def clean_data(df, keep_cols = ['cancer']):
-    # Prepare data for basic binary prediction
+    """
+    Selection of columns and removing of NaNs.
+
+    Parameters:
+        df (csv): dataframe to clean
+        keep_cols (list): list of columns (other than genes) to keep^n the output dataset
+    Returns:
+        df (csv): clean dataframe
+    """
     col_names_not_dna = [col for col in df.columns if not col.isdigit()]
 
     for col in keep_cols:
@@ -68,6 +84,11 @@ def clean_data(df, keep_cols = ['cancer']):
 
 def process_tcga_data(test:bool=False, landmark:bool=False):
     """
+    Parameters:
+        test (bool): whether to process the test set
+        landmark (bool): whether to keep only landmark genes
+    Returns:
+        tuple of processed genes (tensor), processed numerical covariates (tensor), categorical covariates (tensor)
     """
     df_tcga = load_tcga(test)
     df_tcga = clean_data(df_tcga, keep_cols = ['age','gender','cancer', 'tissue_type'])
@@ -114,6 +135,13 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     return true, numerical_covs, categorical_covs
 
 def process_gtex_data(test:bool=False, landmark:bool=False):
+    """
+    Parameters:
+        test (bool): whether to process the test set
+        landmark (bool): whether to keep only landmark genes
+    Returns:
+        tuple of processed genes (tensor), processed numerical covariates (tensor), categorical covariates (tensor)
+    """
     df_gtex = load_gtex(test)
     df_gtex = clean_data(df_gtex, keep_cols = ['age','gender', 'tissue_type'])
 
@@ -156,6 +184,14 @@ def process_gtex_data(test:bool=False, landmark:bool=False):
     return df_gtex, numerical_covs, categorical_covs
 
 def get_tcga_datasets(scaler_type:str="standard"):
+    """
+    Global function to obtain preprocessed TCGA dataset.
+    ----
+    Parameters:
+        scaler_type (str): type of data scaling (e.g., minmax, standard, maxabs)
+    Returns:
+        tuple of train and test sets as pytorch datasets
+    """
     # Load train data
     X_train, numerical_covs, y_train = process_tcga_data(test=False, landmark=True)
     # Load test data
@@ -192,6 +228,12 @@ def get_tcga_datasets(scaler_type:str="standard"):
 
 def get_datasets_for_search(dataset:str):
     """
+    Global function to obtain the preprocessed dataset of landmark genes (unscaled) for hyperparameters search.
+    ----
+    Parameters:
+        dataset (str): dataset name ('tcga' or 'gtex')
+    Returns:
+        tuple of (X_train, y_train, X_test, y_test) as tensors
     """
     # Load train data
     if dataset=='tcga':
@@ -205,6 +247,18 @@ def get_datasets_for_search(dataset:str):
     return X, y, X_test, y_test
 
 def split_and_scale_datasets(X, y, X_test, y_test, scaler_type:str="standard"):
+    """
+    Function to split and scale the training set.
+    ----
+    Parameters:
+        X (array): Train data
+        y (array): Train labels
+        X_test (array): Test data
+        y_test (array): Test labels
+        scaler_type (str): type of scaling (e.g., minmax, standard, maxabs)
+    Returns:
+        tuple of train, val, test pytorch datasets
+    """
     # Split
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
@@ -240,6 +294,17 @@ def split_and_scale_datasets(X, y, X_test, y_test, scaler_type:str="standard"):
     return train, val, test
 
 def build_loaders(train, val, test=None, config:dict=None):
+    """
+    Buil pytorch dataloaders.
+    ----
+    Parameters:
+        train (tensor): train tensor data
+        val (tensor): validation tensor data
+        test (tensor): test tensor data (default None)
+        config (dict): dictionary of the model configuration (default None)
+    Returns:
+        tuple of train, val (and test if specified) pytorch dataloaders
+    """
     train_loader = data_utils.DataLoader(
                                         train,
                                         batch_size=config['batch_size'],
@@ -272,6 +337,14 @@ def build_loaders(train, val, test=None, config:dict=None):
         return train_loader, val_loader 
 
 def get_gtex_datasets(scaler_type:str="standard"):
+    """
+    Global function to obtain preprocessed GTEx dataset.
+    ----
+    Parameters:
+        scaler_type (str): type of data scaling (e.g., minmax, standard, maxabs)
+    Returns:
+        tuple of train and test sets as pytorch datasets
+    """
     # Load train data
     X_train, numerical_covs, y_train = process_gtex_data(test=False, landmark=True)
     # Load test data
