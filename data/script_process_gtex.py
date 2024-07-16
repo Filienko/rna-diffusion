@@ -138,6 +138,9 @@ def main():
     # Rename columns with EntrezIds
     df.columns=list(np.concatenate((df.iloc[1].values.flatten()[:-4],df.iloc[0].values.flatten()[-4:])))
 
+    # Drop first rows
+    df = df.drop(['Name','Description'], axis=0).reset_index(drop=True)
+
     print(df)
 
     ##################################
