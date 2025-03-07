@@ -17,17 +17,17 @@ def load_tcga(test:bool=False):
         path = f"/home/alacan/data_RNAseq_RTCGA/test_df_covariates.csv"
     else:
         path = f"/home/alacan/data_RNAseq_RTCGA/train_df_covariates.csv"
-    df_tcga = pd.read_csv(path, ',')
+    df_tcga = pd.read_csv(path)
     return df_tcga
 
 def load_gtex(test:bool=False):
     # HARDCODED
     #path = "/home/alacan/scripts/diffusion_models/diffusion/diffusion/ddim/sources/datasets/"+dataset+".csv"
     if test:
-        path = f"/home/alacan/GTEx_data/df_test_gtex_L974.csv"
+        path = f"./data/df_test_gtex_L974.csv"
     else:
-        path = f"/home/alacan/GTEx_data/df_train_gtex_L974.csv"
-    df = pd.read_csv(path, ',')
+        path = f"./data/df_train_gtex_L974.csv"
+    df = pd.read_csv(path)
     return df
 
 def clean_data(df, keep_cols = ['cancer']):
@@ -71,7 +71,7 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     print(categorical_covs.shape)
 
     #tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     true = df_tcga.drop(columns = ['age','gender','cancer','tissue_type'])
     
@@ -119,7 +119,7 @@ def process_gtex_data(test:bool=False, landmark:bool=False):
     categorical_covs = Tissue_Encoder.transform(X = categorical_covs)
 
     # tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     df_gtex = df_gtex.drop(columns = ['age','gender','tissue_type'])
     df_gtex = df_gtex.values
@@ -184,7 +184,7 @@ def get_datasets_for_search(dataset:str):
 def split_and_scale_datasets(X, y, X_test, y_test, scaler_type:str="standard"):
     # Split
     X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
-
+    print("SPLITTED the dataset")
     # Scale the data
     if scaler_type == "standard":
         scaler = StandardScaler()
@@ -248,8 +248,10 @@ def build_loaders(train, val, test=None, config:dict=None):
 def get_gtex_datasets(scaler_type:str="standard"):
     # Load train data
     X_train, numerical_covs, y_train = process_gtex_data(test=False, landmark=True)
-    # Load test data
+    print("X_train",X_train)
+   # Load test data
     X_test, numerical_covs_test, y_test = process_gtex_data(test=True, landmark=True)
+    print("X_test", X_test)
     # Split
     # X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 

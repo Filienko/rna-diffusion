@@ -140,7 +140,7 @@ def main():
         # Correlations
         corr = gamma_coeff_score(x_real, x_gen)
         # Frechet
-        frechet = compute_frechet_distance_score(x_real, x_gen, dataset=CONFIG['dataset'], device=CUDA_DEVICE2, to_standardize=False)
+        frechet = 0 # compute_frechet_distance_score(x_real, x_gen, dataset=CONFIG['dataset'], device=CUDA_DEVICE2, to_standardize=False)
 
         PREC.append(prec)
         RECALL.append(recall)
@@ -233,14 +233,15 @@ def main():
     
     # Build dataframe
     df_temp = pd.DataFrame(data=d, index=[0])
+    df = df_temp
+    # Check if file exists and has content
+    if os.path.exists(PATH_RESULTS_DATAFRAME) and os.path.getsize(PATH_RESULTS_DATAFRAME) > 0:
+        df = pd.read_csv(PATH_RESULTS_DATAFRAME, sep=',')
+        # Merge dataframes
+        df = pd.concat([df, df_temp])
 
-    # Load results dataframe
-    df = pd.read_csv(PATH_RESULTS_DATAFRAME, sep =',')
-    
-    # Merge dataframes
-    df = pd.concat([df, df_temp])
-    df.to_csv(PATH_RESULTS_DATAFRAME, sep =',', header=True, index=False)
-    df = pd.read_csv(PATH_RESULTS_DATAFRAME, sep =',')
+    # Save the updated dataframe
+    df.to_csv(PATH_RESULTS_DATAFRAME, sep=',', header=True, index=False)
     
 # Run function    
 if __name__ == '__main__':

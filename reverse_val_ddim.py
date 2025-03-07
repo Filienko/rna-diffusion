@@ -270,7 +270,7 @@ def main():
         ########## 5. Test pretrained classifier on generated data #########
 
         # Path where pretrained weights are stored    
-        path_model = f'/home/alacan/scripts/classification/landmarks/results/model_{CONFIG.data.dataset_frechet.lower()}.pth'
+        path_model = f'./classificationlandmarks/results/model_{CONFIG.data.dataset_frechet.lower()}.pth'
         # Instantiate model
         cls = TissuePredictor(CONFIG_CLS, CONFIG.data.dataset_frechet.lower())
         # Load pretrained model

@@ -39,7 +39,7 @@ if "cuda" in DEVICE:
 else:
     CUDA_DEVICE = "cpu"
 
-PATH_RESULTS_DATAFRAME = './src/classification/results/results.csv'
+PATH_RESULTS_DATAFRAME = './sr./classification/results//results.csv'
 
 # Import model config and hyperparameters
 from config import CONFIGS

@@ -365,6 +365,8 @@ class WGAN(object):
             # Perform random augmentations for stability
             augmentations = torch.distributions.binomial.Binomial(total_count=1, probs=prob_success).sample(torch.tensor([BATCH_SIZE])).to(gen_outputs.device)
             gen_outputs = gen_outputs + augmentations[:, None] * torch.normal(0, norm_scale, size=(NB_GENES,), device=gen_outputs.device)
+            #print("training BATCH size", x.shape)
+            #print("BATCH size", BATCH_SIZE)
             x = x + augmentations[:,None] * torch.normal(0, norm_scale, size=(BATCH_SIZE,NB_GENES), device=x.device)
 
             # Forward pass on discriminator with concatenated variables
@@ -546,7 +548,8 @@ class WGAN(object):
 
             # Loop over batches
             for batch, labels in TrainDataLoader:
-
+                # print("shape",batch.shape)
+                # print("shape again",labels.shape)
                 # To device
                 batch = batch.to(self.device)
                 batch_categorical = labels.to(self.device)

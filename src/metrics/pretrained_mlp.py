@@ -14,7 +14,7 @@ random.seed(42)
 # Model architecture 
 
 # We keep the same paths to save results
-# PWD = '/home/alacan/scripts/classification/landmarks'
+# PWD = './classificationlandmarks'
 RES_DIR = './results/cls_{}.pth'
 
 CONFIG1 = {

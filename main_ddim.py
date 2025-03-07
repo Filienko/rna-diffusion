@@ -12,7 +12,7 @@ import time as t
 import pandas as pd
 
 # import torch.utils.tensorboard as tb
-from runners.diffusion import Diffusion
+from runners.ddim.runners.diffusion import Diffusion
 
 # SEED
 torch.manual_seed(42)

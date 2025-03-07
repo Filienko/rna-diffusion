@@ -158,7 +158,7 @@ for i in range(NB_RUNS):
     ########## 5. Test pretrained classifier on generated data #########
 
     # Path where pretrained weights are stored    
-    # path_model = f'/home/alacan/scripts/gerec_pipeline/classification/results/model_{DATASET.lower()}.pth'
+    # path_model = f'/home/alacan/scripts/gerec_pipelin./classification/results//model_{DATASET.lower()}.pth'
     path_model = f'./src/classification/large_dim/results/model_{DATASET.lower()}.pth'
     # Instantiate model
     cls = TissuePredictor(CONFIG_CLS, DATASET)

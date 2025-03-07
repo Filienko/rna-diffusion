@@ -129,7 +129,7 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     print(categorical_covs.shape)
 
     #tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     true = df_tcga.drop(columns = ['age','gender','cancer','tissue_type'])
     
@@ -194,7 +194,7 @@ def process_gtex_data(test:bool=False, landmark:bool=False):
     categorical_covs = Tissue_Encoder.transform(X = categorical_covs)
 
     # tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     df_gtex = df_gtex.drop(columns = ['age','gender','tissue_type', 'ID'])
     

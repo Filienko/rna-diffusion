@@ -138,9 +138,9 @@ def compute_frechet_distance_score(
         config = CONFIGS[2]
 
     # Path where pretrained weights are stored    
-    # path_model = f'/home/alacan/scripts/classification/landmarks/results/model_{dataset.lower()}.pth'
-    # path_model = f'/home/alacan/scripts/gerec_pipeline/src/classification/results/model_{dataset.lower()}.pth'
-    path_model = f'/home/alacan/scripts/classification/landmarks/results/model_{dataset.lower()}.pth'
+    # path_model = f'./classificationlandmarks/results/model_{dataset.lower()}.pth'
+    # path_model = f'/home/alacan/scripts/gerec_pipeline/sr./classification/results//model_{dataset.lower()}.pth'
+    path_model = f'./classification/landmarks/results/model_{dataset.lower()}.pth'
 
     # Init pretrained model
     model = init_pretrained_classifier(config, dataset, path_model, device)

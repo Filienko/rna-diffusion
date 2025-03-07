@@ -30,17 +30,17 @@ def load_tcga(test:bool=False):
         path = f"/home/alacan/data_RNAseq_RTCGA/test_df_covariates.csv"
     else:
         path = f"/home/alacan/data_RNAseq_RTCGA/train_df_covariates.csv"
-    df_tcga = pd.read_csv(path, ',')
+    df_tcga = pd.read_csv(path)
     return df_tcga
 
 def load_gtex(test:bool=False):
     # HARDCODED
     #path = "/home/alacan/scripts/diffusion_models/diffusion/diffusion/ddim/sources/datasets/"+dataset+".csv"
     if test:
-        path = f"/home/alacan/GTEx_data/df_test_gtex_L974.csv"
+        path = f"/home/daniilf/rna-diffusion/data/df_test_gtex_L974.csv"
     else:
-        path = f"/home/alacan/GTEx_data/df_train_gtex_L974.csv"
-    df = pd.read_csv(path, ',')
+        path = f"/home/daniilf/rna-diffusion/data/df_train_gtex_L974.csv"
+    df = pd.read_csv(path)
     return df
 
 def clean_data(df, keep_cols = ['cancer']):
@@ -60,7 +60,9 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     """
     """
     df_tcga = load_tcga(test)
-    df_tcga = clean_data(df_tcga, keep_cols = ['age','gender','cancer', 'tissue_type'])
+    #keep_columns = ['age','gender','cancer', 'tissue_type']
+    keep_columns =  df_tcga.columns
+    df_tcga = clean_data(df_tcga, keep_cols = keep_columns)
 
     #age, gender, cancer
     numerical_covs = df_tcga[['age','gender','cancer']]
@@ -84,7 +86,7 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     print(categorical_covs.shape)
 
     #tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     true = df_tcga.drop(columns = ['age','gender','cancer','tissue_type'])
     
@@ -104,9 +106,18 @@ def process_tcga_data(test:bool=False, landmark:bool=False):
     return true, numerical_covs, categorical_covs
 
 def process_gtex_data(test:bool=False, landmark:bool=False):
+    # print("before", test)
     df_gtex = load_gtex(test)
-    df_gtex = clean_data(df_gtex, keep_cols = ['age','gender', 'tissue_type'])
+    # print(f"before{df_gtex.shape}; loaded", df_gtex)
+    # keep_columns = ['age','gender','tissue_type','DFFB','ICMT', 'tissue_type_details']
+    df_gtex = df_gtex.drop(['tissue_type_details', 'index'], axis=1)
+    keep_columns = df_gtex.columns
+    # all_columns = df_gtex.columns.tolist()  # Convert to a list
+    # print(all_columns)  # Prints the full list without truncation
+    # print("OK  keep_columns",  keep_columns)
+    df_gtex = clean_data(df_gtex, keep_cols = keep_columns)
 
+    # print(f"before; {df_gtex.shape} cleaned", df_gtex)
     #age, gender
     numerical_covs = df_gtex[['age','gender']]
 
@@ -132,17 +143,19 @@ def process_gtex_data(test:bool=False, landmark:bool=False):
     categorical_covs = Tissue_Encoder.transform(X = categorical_covs)
 
     # tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     df_gtex = df_gtex.drop(columns = ['age','gender','tissue_type'])
     df_gtex = df_gtex.values
     df_gtex = df_gtex.astype(np.float32)
-
+    # print(f"after {df_gtex.shape}; cleaned", df_gtex)
     # convert to torch tensor
     df_gtex = torch.from_numpy(df_gtex)
     numerical_covs = torch.from_numpy(numerical_covs)
     categorical_covs = torch.from_numpy(categorical_covs.toarray())
-
+    # print("after; clean", df_gtex)
+    # print(f"after; {numerical_covs.shape} numerical_covs clean",  numerical_covs)
+    # print("after; categorical_cov clean", categorical_covs)
     return df_gtex, numerical_covs, categorical_covs
 
 def get_tcga_datasets(scaler_type:str="standard"):
@@ -512,7 +525,8 @@ def epoch_checkpoint_train(x_real, x_gen,
     list_aats_train.append(adversarial)
 
     # Frechet
-    frechet = compute_frechet_distance_score(x_real, x_gen, dataset, device, to_standardize=False)
+    # frechet = compute_frechet_distance_score(x_real, x_gen, dataset, device, to_standardize=False)
+    frechet = 0
     list_frechet_train.append(frechet)
 
     return list_val_score, list_prec_recall_train, list_dens_cov_train, list_aats_train, list_frechet_train

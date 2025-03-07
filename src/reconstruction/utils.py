@@ -85,7 +85,7 @@ def process_tcga_data(test:bool=False, landmark:bool=False, split_landmark:bool=
     print(categorical_covs.shape)
 
     #tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
     true = df_tcga.drop(columns = ['age','gender','cancer','tissue_type'])
     
     if split_landmark:
@@ -150,7 +150,7 @@ def process_tcga_data_with_details(test:bool=False, landmark:bool=False, split_l
     ct_details = df_tcga['cancer_type'].to_numpy()
 
     #tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
     true = df_tcga.drop(columns = ['age','gender','cancer','tissue_type', 'cancer_type'])
     
     if split_landmark:
@@ -241,7 +241,7 @@ def process_gtex_data(test:bool=False, landmark:bool=False, split_landmark:bool=
     categorical_covs = Tissue_Encoder.transform(X = categorical_covs)
 
     # tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     df_gtex = df_gtex.drop(columns = ['age','gender','tissue_type'])
     
@@ -306,7 +306,7 @@ def process_gtex_data_with_details(test:bool=False, landmark:bool=False, split_l
     categorical_covs = Tissue_Encoder.transform(X = categorical_covs)
 
     # tissues types as one hot
-    categorical_covs = categorical_covs.astype(np.int)
+    categorical_covs = categorical_covs.astype(int)
 
     # tissue_type_details
     tt_details = df_gtex['tissue_type_details'].to_numpy()
