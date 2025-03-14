@@ -1,0 +1,4 @@
+
+src/generation/gans/results/*
+*.csv
+*.zip

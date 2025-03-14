@@ -161,3 +161,20 @@ class RNADataProcessor():
 
             t_end = process_time()
             print(f'[Callback]| Preprocessing took {round(t_end - t1, 5)} seconds to run.')
+
+
+Processor = RNADataProcessor(_type_='data', cancer_type='all', dataset='tcga')
+Processor.preprocessing()
+
+df = Loader.build_full_dataframe('./tcga_files')
+df.to_csv('./tcga_files/TCGA_rnaseq_RSEM_full_dataset.csv', index=False)
+df_final = Loader.process_all_covariates('./tcga_files/TCGA_rnaseq_RSEM_full_dataset.csv')
+
+from utils_preprocessing import train_test_split
+
+df_train, df_test = train_test_split(df_final, split_ratios=[0.8, 0.2], shuffle=True)
+
+df_train.to_csv('./tcga_files/train_df_covariates.csv', index=False)
+df_test.to_csv('./tcga_files/test_df_covariates.csv', index=False)
+
+

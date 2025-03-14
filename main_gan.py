@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 import random
 from src.generation.gans.model import WGAN
-from src.generation.gans.utils import get_tcga_datasets, get_gtex_datasets, build_loaders
+from src.generation.gans.utils import get_tcga_datasets, get_gtex_datasets,get_cambda_datasets, build_loaders
 # Import model config and hyperparameters
 from src.generation.gans.config import CONFIG
 # sys.path.append(os.path.abspath("../metrics"))
@@ -86,15 +86,18 @@ def main():
     print("----> Loading data")
     if CONFIG['dataset']=='tcga':
         train, test = get_tcga_datasets(scaler_type='standard')  
+        # CONFIG['x_dim'] = 974 # 974 landmark genes in gtex
     elif CONFIG['dataset'] =='gtex':
         train, test = get_gtex_datasets(scaler_type='standard')
         CONFIG['vocab_size'] = 26 # 26 tissue types in gtex
         CONFIG['x_dim'] = 974 # 974 landmark genes in gtex
-
+    elif CONFIG['dataset'] =='cambda':
+        train, test = get_cambda_datasets(scaler_type='standard')
+        CONFIG['x_dim'] = 978
+        # CONFIG['vocab_size'] = 26 # 26 tissue types in gtex
     # Dataloader
     print("----> Building dataloaders")
     train_loader, test_loader = build_loaders(train, test, config=CONFIG)
-
     # Model
     print(f"--> Loading WGAN-GP.")
     model = WGAN(CONFIG)
