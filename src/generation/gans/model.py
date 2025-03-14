@@ -101,6 +101,7 @@ class Generator(nn.Module):
         Returns:
             (torch.tensor): generated data
         """
+        y = y.argmax(dim=1) if y.dim() > 1 else y.long()
         y = self.embedding(y)  # Embedding for tissue types/cancer types
         # Concatenate all variables (expression data and conditions)
         x = torch.cat((x, y.flatten(start_dim=1)), 1)
@@ -196,6 +197,7 @@ class Discriminator(nn.Module):
         Returns:
             (torch.tensor): predicted score (unconstrained)
         """
+        y = y.argmax(dim=1) if y.dim() > 1 else y.long()
         y = self.embedding(y)  # Embedding for tissue types/cancer types
         # Concatenate all variables (expression data, numerical covariates and
         # flattened embeddings)
@@ -228,7 +230,7 @@ class WGAN(object):
         self.hidden_dim2_d = config['hidden_dim2_d']
         self.output_dim = config['output_dim']
         self.vocab_size = config['vocab_size']
-        self.epochs_checkpoints = config['epochs_checkpoints']
+        self.epochs_checkpoints = "/home/daniilf/rna-diffusion/checkpoints"
         self.nb_nn = config['nb_nn']
 
         #  use gpu if available

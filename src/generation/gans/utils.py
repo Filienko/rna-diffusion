@@ -1,9 +1,3 @@
-"""
-
-Tool box for training.
-
-"""
-
 # Imports
 import os
 import sys
@@ -11,7 +5,7 @@ import numpy as np
 import torch
 import time as t
 import pandas as pd
-
+import pickle
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler, QuantileTransformer, RobustScaler, MaxAbsScaler
 from sklearn.model_selection import train_test_split
 import torch.utils.data as data_utils
@@ -222,6 +216,100 @@ def process_gtex_data(test:bool=False, landmark:bool=False):
     # print("after; categorical_cov clean", categorical_covs)
     return df_gtex, numerical_covs, categorical_covs
 
+def process_cambda_data(test:bool=False, landmark:bool=False, numerical_cols=None, categorical_cols=None):
+    """
+    Process CAMBDA data with flexible categorical columns handling
+    
+    Parameters:
+    -----------
+    test : bool
+        Whether to use test data
+    landmark : bool
+        Whether to use landmark genes only
+    numerical_cols : list or None
+        List of numerical columns to use as covariates
+    categorical_cols : list or None
+        List of categorical columns to use for one-hot encoding
+    
+    Returns:
+    --------
+    tuple
+        (gene expression data, numerical covariates, categorical covariates)
+    """
+    # Load data
+    df = load_tcga(test)
+    print(f"Loaded data shape: {df.shape}")
+    print(f"Column names sample: {df.columns[:10]}...")
+    
+    # Set default columns if None
+    if numerical_cols is None:
+        numerical_cols = ['label'] if 'label' in df.columns else []
+    
+    if categorical_cols is None:
+        categorical_cols = ['cancer_type'] if 'cancer_type' in df.columns else []
+    
+    # Identify numeric and non-numeric columns
+    numeric_columns = []
+    non_numeric_columns = []
+    
+    # Skip the first column which is likely an index
+    for col in df.columns[1:]:
+        # Check if column can be converted to numeric
+        try:
+            df[col].astype(float)
+            numeric_columns.append(col)
+        except (ValueError, TypeError):
+            non_numeric_columns.append(col)
+    
+    print(f"Found {len(numeric_columns)} numeric columns and {len(non_numeric_columns)} non-numeric columns")
+    
+    # Extract numerical covariates (if any match the requested columns)
+    numerical_covs = np.zeros((len(df), max(1, len(numerical_cols))), dtype=np.float32)
+    
+    # Process categorical covariates
+    # Get one-hot encoding for the first non-numeric column to use as label
+    if len(non_numeric_columns) > 0:
+        label_col = non_numeric_columns[0]
+        print(f"Using '{label_col}' as categorical label")
+        
+        # Get unique categories
+        categories = df[label_col].unique()
+        n_categories = len(categories)
+        print(f"Found {n_categories} unique categories in '{label_col}'")
+        
+        # Create encoder
+        from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+        label_encoder = LabelEncoder()
+        onehot_encoder = OneHotEncoder(sparse_output=False)  # Set sparse=False to get dense array
+        
+        # Fit and transform
+        encoded_labels = label_encoder.fit_transform(df[label_col]).reshape(-1, 1)
+        onehot_labels = onehot_encoder.fit_transform(encoded_labels)
+        
+        with open("label_encoder_cambda.pkl", "wb") as f:
+            pickle.dump(label_encoder, f)
+
+        # Get categorical covariates
+        categorical_covs = onehot_labels
+    else:
+        # Create dummy one-hot vector if no categorical columns found
+        categorical_covs = np.eye(1, dtype=np.int32)[np.zeros(len(df), dtype=np.int32)]
+    
+    # Extract gene expression data (all numeric columns)
+    expression_data = df[numeric_columns].values.astype(np.float32)
+    
+    print(f"Expression data shape: {expression_data.shape}")
+    print(f"Categorical covariates shape: {categorical_covs.shape}")
+    
+    # Convert to tensors
+    expression_tensor = torch.from_numpy(expression_data)
+    numerical_tensor = torch.from_numpy(numerical_covs)
+    categorical_tensor = torch.from_numpy(categorical_covs)
+    
+    return expression_tensor, numerical_tensor, categorical_tensor
+
+
+'''
 def process_cambda_data(test:bool=False, landmark:bool=False, numerical_cols=['label'], 
                         categorical_cols=['cancer_type', 'subtype']):
     """
@@ -337,7 +425,7 @@ def process_cambda_data(test:bool=False, landmark:bool=False, numerical_cols=['l
     categorical_tensor = torch.from_numpy(categorical_covs)
     
     return expression_tensor, numerical_tensor, categorical_tensor
-
+'''
 def get_tcga_datasets(scaler_type:str="standard"):
     # Load train data
     X_train, numerical_covs, y_train = process_tcga_data(test=False, landmark=True)
@@ -372,7 +460,55 @@ def get_tcga_datasets(scaler_type:str="standard"):
     test = data_utils.TensorDataset(X_test, y_test) 
 
     return train, test
+def get_cambda_datasets(scaler_type:str="standard"):
+    """
+    Global function to obtain preprocessed CAMBDA dataset.
+    ----
+    Parameters:
+        scaler_type (str): type of data scaling (e.g., minmax, standard, maxabs)
+    Returns:
+        tuple of train and test sets as pytorch datasets
+    """
+    # Load train data
+    X_train, numerical_covs, y_train = process_cambda_data(test=False, landmark=False)
+    
+    # Load test data (or use a subset of training data if test not available)
+    try:
+        X_test, numerical_covs_test, y_test = process_cambda_data(test=True, landmark=False)
+    except Exception as e:
+        print(f"Error loading test data: {e}")
+        # Split training data to create test set
+        from sklearn.model_selection import train_test_split
+        X_train_subset, X_test, y_train_subset, y_test = train_test_split(
+            X_train, y_train, test_size=0.2, random_state=42, stratify=y_train.argmax(dim=1) if len(y_train.shape) > 1 else None
+        )
+        X_train = X_train_subset
+        y_train = y_train_subset
 
+    # Scale the data
+    if scaler_type == "standard":
+        scaler = StandardScaler()
+    elif scaler_type == "minmax":
+        scaler = MinMaxScaler()
+    elif scaler_type == "robust":
+        scaler = RobustScaler()
+    elif scaler_type == "maxabs":
+        scaler = MaxAbsScaler()
+    else:
+        raise Exception("Unknown scaler type")
+
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Turn data into tensors
+    X_train = torch.tensor(X_train).type(torch.float)
+    X_test = torch.tensor(X_test).type(torch.float)
+
+    train = data_utils.TensorDataset(X_train, y_train) 
+    test = data_utils.TensorDataset(X_test, y_test) 
+
+    return train, test
+'''
 def get_cambda_datasets(scaler_type:str="standard"):
     # Load train data
     X_train, numerical_covs, y_train = process_cambda_data(test=False, landmark=True)
@@ -407,6 +543,7 @@ def get_cambda_datasets(scaler_type:str="standard"):
     test = data_utils.TensorDataset(X_test, y_test)
 
     return train, test
+'''
 def get_datasets_for_search(dataset:str):
     """
     """
@@ -734,7 +871,9 @@ def epoch_checkpoint_train(x_real, x_gen,
     list_dens_cov_train.append((density, cov))
 
     # AAts (adversarial accuracy) on train data
-    idx = np.random.choice(len(x_real), 4096, replace=False)
+    sample_size = min(4096, len(x_real))
+    idx = np.random.choice(len(x_real), sample_size, replace=False)
+
     _, _, adversarial = compute_AAts(real_data=x_real[idx], fake_data=x_gen[idx])
     list_aats_train.append(adversarial)
 

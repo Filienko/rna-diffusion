@@ -94,10 +94,19 @@ def main():
     elif CONFIG['dataset'] =='cambda':
         train, test = get_cambda_datasets(scaler_type='standard')
         CONFIG['x_dim'] = 978
-        # CONFIG['vocab_size'] = 26 # 26 tissue types in gtex
+    # Update config with correct dimensions
+    print(f"Dimensions for CAMBDA: x_dim={CONFIG['x_dim']}, vocab_size={CONFIG['vocab_size']}")
+
+
     # Dataloader
     print("----> Building dataloaders")
     train_loader, test_loader = build_loaders(train, test, config=CONFIG)
+    for batch, labels in iter(train_loader):
+        CONFIG['x_dim'] = batch.shape[1]  # Update input dimension from data
+        CONFIG['vocab_size'] = labels.shape[1]  # Update vocabulary size from labels
+        print(f"Updated dimensions for CAMBDA: x_dim={CONFIG['x_dim']}, vocab_size={CONFIG['vocab_size']}")
+        break
+
     # Model
     print(f"--> Loading WGAN-GP.")
     model = WGAN(CONFIG)
@@ -135,10 +144,12 @@ def main():
         # Get new generated data batch
         x_real, x_gen = model.generate(train_loader, return_labels=False)
         x_real, x_gen = x_real.numpy(), x_gen.numpy()
+
         # Precision/Recall/Density/Coverage
         prec, recall, dens, cov = compute_prdc(x_real, x_gen, CONFIG['nb_nn'])
         # Adversarial accuracy
-        idx = np.random.choice(len(x_real), 4096, replace=False) # Sample random data
+        sample_size = min(len(x_real), 4096)
+        idx = np.random.choice(len(x_real), sample_size, replace=False)
         _, _, adversarial = compute_AAts(real_data=x_real[idx], fake_data=x_gen[idx])
         # Correlations
         corr = gamma_coeff_score(x_real, x_gen)
@@ -185,6 +196,23 @@ def main():
                          'frechet': [final_fd, final_fd_std] }
     np.save(model.log_dir+'/dict_res_metrics_5runs.npy', dict_res_5runs)
      
+    # Get new generated data batch
+    x_real, x_gen, y = model.generate(train_loader, return_labels=True)
+    x_real_test, x_gen_test, y_test = model.generate(test_loader, return_labels=True)
+
+    x_real, x_gen, y = x_real.numpy(), x_gen.numpy(), y.numpy()
+    x_real_test, x_gen_test, y_test = x_real_test.numpy(), x_gen_test.numpy(), y_test.numpy()
+
+    np.save("x_real_gan.npy", x_real)
+    np.save("x_gen_gan.npy", x_gen)
+    np.save("y.npy", y)
+
+    np.save("x_real_gan_test.npy", x_real_test)
+    np.save("x_gen_gan_test.npy", x_gen_test)
+    np.save("y_test.npy", y_test)
+
+    print("train saved")
+    print("test saved")
     
     ############### Training history #####################
     train_history_path = model.log_dir+'/train_history.npy'

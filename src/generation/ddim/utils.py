@@ -30,21 +30,14 @@ def get_dataset(config):
         dataset, test_dataset = get_gtex_datasets(config.data.scaler_type)
 
     return dataset, test_dataset
-
 def load_tcga(test:bool=False):
-    """
-    Parameters:
-        test (bool): whether to load the test dataset
-    Returns:
-        TCGA dataframe (csv)
-    """
-    # HARDCODED
     if test:
-        path = f"/home/alacan/data_RNAseq_RTCGA/test_df_covariates.csv"
+        path = f"/home/daniilf/rna-diffusion/data/processed_tcga_data/test_df_covariates.csv"
     else:
-        path = f"/home/alacan/data_RNAseq_RTCGA/train_df_covariates.csv"
-    df_tcga = pd.read_csv(path, ',')
+        path = f"/home/daniilf/rna-diffusion/data/processed_tcga_data/train_df_covariates.csv"
+    df_tcga = pd.read_csv(path)
     return df_tcga
+
 
 def load_gtex(test:bool=False):
     """
@@ -191,9 +184,9 @@ def get_tcga_datasets(scaler_type:str="standard"):
         tuple of train and test sets as pytorch datasets
     """
     # Load train data
-    X_train, numerical_covs, y_train = process_tcga_data(test=False, landmark=True)
+    X_train, numerical_covs, y_train = process_tcga_data(test=False, landmark=False)
     # Load test data
-    X_test, numerical_covs_test, y_test = process_tcga_data(test=True, landmark=True)
+    X_test, numerical_covs_test, y_test = process_tcga_data(test=True, landmark=False)
 
     # Scale the data
     if scaler_type == "standard":
